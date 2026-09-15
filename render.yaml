@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: tg-filestream-bot
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /status
+    envVars:
+      - key: API_ID
+        sync: false
+      - key: API_HASH
+        sync: false
+      - key: BOT_TOKEN
+        sync: false
+      - key: BIN_CHANNEL
+        sync: false
+      - key: FQDN
+        sync: false
+      - key: HAS_SSL
+        value: "true"
+      - key: NO_PORT
+        value: "true"
+      - key: KEEP_ALIVE
+        value: "true"
