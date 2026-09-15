@@ -1,24 +1,29 @@
+# Exported from Render on 2026-09-15T16:05:26Z
+version: "1"
 services:
-  - type: web
-    name: tg-filestream-bot
-    env: docker
-    plan: free
-    dockerfilePath: ./Dockerfile
-    healthCheckPath: /status
-    envVars:
-      - key: API_ID
-        sync: false
-      - key: API_HASH
-        sync: false
-      - key: BOT_TOKEN
-        sync: false
-      - key: BIN_CHANNEL
-        sync: false
-      - key: FQDN
-        sync: false
-      - key: HAS_SSL
-        value: "true"
-      - key: NO_PORT
-        value: "true"
-      - key: KEEP_ALIVE
-        value: "true"
+- type: web
+  name: "-1.0"
+  runtime: docker
+  repo: https://github.com/zhz1989/-1.0
+  plan: free
+  envVars:
+  - key: FQDN
+    sync: false
+  - key: KEEP_ALIVE
+    sync: false
+  - key: NO_PORT
+    sync: false
+  - key: HAS_SSL
+    sync: false
+  - key: BIN_CHANNEL
+    sync: false
+  - key: BOT_TOKEN
+    sync: false
+  - key: API_HASH
+    sync: false
+  - key: API_ID
+    sync: false
+  region: oregon
+  dockerContext: .
+  dockerfilePath: ./Dockerfile
+  autoDeployTrigger: commit
