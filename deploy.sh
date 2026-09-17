@@ -1,0 +1,102 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+APP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$APP_DIR"
+
+ACTION="${1:-start}"
+
+command -v docker >/dev/null 2>&1 || {
+  echo "错误：未检测到 Docker，请先安装 Docker。"
+  exit 1
+}
+
+docker compose version >/dev/null 2>&1 || {
+  echo "错误：未检测到 Docker Compose 插件，请安装 Docker Compose v2。"
+  exit 1
+}
+
+ensure_env() {
+  if [[ ! -f .env ]]; then
+    if [[ -f .env.example ]]; then
+      cp .env.example .env
+      echo "已创建 .env，请先填写 BOT_TOKEN、API_ID 和 API_HASH，然后重新运行脚本。"
+      exit 0
+    else
+      echo "错误：未找到 .env.example 文件。"
+      exit 1
+    fi
+  fi
+}
+
+validate_env() {
+  local required_vars=(BOT_TOKEN API_ID API_HASH)
+  for var in "${required_vars[@]}"; do
+    local value
+    value="$(grep -E "^${var}=" .env | tail -n 1 | cut -d '=' -f 2- || true)"
+    if [[ -z "$value" || "$value" == "your_"* || "$value" == "你的_"* ]]; then
+      echo "错误：请在 .env 中配置 ${var}。"
+      exit 1
+    fi
+  done
+}
+
+start_app() {
+  validate_env
+  echo "正在启动 TG-FileStreamBot..."
+  docker compose up -d --build
+  echo
+  echo "启动成功。"
+  echo "状态：docker compose ps"
+  echo "日志：docker compose logs -f"
+}
+
+stop_app() {
+  echo "正在停止 TG-FileStreamBot..."
+  docker compose down
+  echo "已停止。"
+}
+
+restart_app() {
+  stop_app
+  start_app
+}
+
+status_app() {
+  docker compose ps
+}
+
+logs_app() {
+  docker compose logs -f --tail=200
+}
+
+case "$ACTION" in
+  start)
+    ensure_env
+    start_app
+    ;;
+  stop)
+    stop_app
+    ;;
+  restart)
+    restart_app
+    ;;
+  status)
+    status_app
+    ;;
+  logs)
+    logs_app
+    ;;
+  rebuild)
+    ensure_env
+    validate_env
+    echo "正在重建镜像..."
+    docker compose down
+    docker compose up -d --build --force-recreate
+    echo "重建完成。"
+    ;;
+  *)
+    echo "用法: $0 [start|stop|restart|status|logs|rebuild]"
+    exit 1
+    ;;
+esac
